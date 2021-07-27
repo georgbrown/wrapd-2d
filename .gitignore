@@ -1,0 +1,8 @@
+*.vscode
+*.png
+*.mp4
+build
+*.code-workspace
+output
+deps/pardiso
+samples/data/exp
