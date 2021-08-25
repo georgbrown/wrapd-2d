@@ -107,6 +107,8 @@ class System {
 
     int get_WtW(math::Triplets &triplets);
 
+    std::vector<double> get_distortion() const;
+
     math::MatX2 get_b();
     void get_A(math::Triplets &triplets);
     void update_A(math::SpMat &A);

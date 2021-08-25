@@ -18,7 +18,7 @@ This project contains a submodule:
 
 On Ubuntu the required depencencies can be installed with the following command:
 
-    sudo apt-get install git cmake libblas-dev liblapack-dev libgfortran-9-dev
+    sudo apt-get install git cmake libx11-dev mesa-common-dev libgl1-mesa-dev libglu1-mesa-dev libxrandr-dev libxi-dev libxmu-dev libxinerama-dev libxcursor-dev libblas-dev liblapack-dev libgfortran-9-dev
 
 PARDISO is strongly recommended. Without PARIDSO our algorithm will perform worse than we reported in the paper. If PARDISO is not detected then our algorithm falls back to using Eigen for linear solver operations.
 
@@ -31,9 +31,9 @@ Note that you will need to place a license file in your root user directory.
 1. Verify that all the dependencies are installed (see above) 
 2. Clone the repository and go into to the project root directory (`wrapd-2d`).
 3. Run `git submodule update --init`
-5. Copy the PARDISO library file (ending in `.so`) to `wrapd-2d/deps/pardiso/`
-6. Run `mkdir build && cd build && cmake .. && make -j`
-7. Go back to the `wrapd-2d` directory
+4. Copy the PARDISO library file (ending in `.so`) to `wrapd-2d/deps/pardiso/`
+5. Run `mkdir build && cd build && cmake .. && make -j`
+6. Go back to the `wrapd-2d` directory
 
 ## Using the software (example)
 
@@ -52,6 +52,14 @@ The output mesh and data will be saved into a directory in `wrapd-2d/output/`.
 There are many optional arguments that can be provided to tune the algorithm and enable/disable particular features. For a complete list of options type:
 
     ./build/param --help
+
+## Viewer
+
+We have included a LIBIGL viewer to visualize the evolution of 2D embeddings across solver iterations. Triangle distortions in the embedding are color-mapped from grey to red (redder means more distorted).
+
+When using the viewer, the solver may be started/paused by pressing spacebar. It is also possible to advance a single iteration at a time by pressing 'i'.
+
+Note: The viewer is enabled by default. To disable it and run the code headless, pass the argument `-viewer 0`.
 
 ## Paper abstract
 

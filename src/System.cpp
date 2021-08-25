@@ -105,6 +105,15 @@ void System::midupdate_WtW() {
 }
 
 
+std::vector<double> System::get_distortion() const {
+    const int n_tri_elements = num_tri_elements();
+    if (n_tri_elements > 0) {
+        return m_tri_elements->get_distortion();
+    } else {
+        throw std::runtime_error("Error: There are no triangle elements. Cannot return element distortions.");
+    }
+}
+
 math::MatX2 System::get_b() {
     if (num_tri_elements() == 0) { 
         throw std::runtime_error("Error: There are no triangle elements.");

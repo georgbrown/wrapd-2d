@@ -35,12 +35,6 @@ Solver::Solver(const Settings &settings) : initialized(false) {
     m_system = std::make_shared<System>(settings);
 }
 
-void Solver::solve() {
-    math::MatX2 X = m_system->X();
-    m_admm_solver.solve(X);
-    m_system->X(X);
-}
-
 bool Solver::initialize(const Settings &settings) {
     m_settings = settings;
     m_admm_solver.initialize(m_system, m_settings);
@@ -54,6 +48,37 @@ void Solver::set_pins(
         const std::vector<int> &inds,
         const std::vector<math::Vec2> &points ) {
     m_system->set_pins(inds, points);
+}
+
+void Solver::solve_offline() {
+    math::MatX2 X = m_system->X();
+    m_admm_solver.solve(X);
+    m_system->X(X);
+}
+
+void Solver::setup() {
+    math::MatX2 X = m_system->X();
+    m_admm_solver.setup_solve(X);
+}
+
+void Solver::iterate() {
+    m_admm_solver.iterate();
+}
+
+bool Solver::termination_check() {
+    if (m_admm_solver.algorithm_data()->earlyexit_asap()) {
+        return true;
+    }
+    if (m_admm_solver.algorithm_data()->converged_strong()) {
+        return true;
+    }
+    return false;
+}
+
+void Solver::finish() {
+    math::MatX2 X;
+    m_admm_solver.finish_solve(X);
+    m_system->X(X);
 }
 
 }  // namespace wrapd

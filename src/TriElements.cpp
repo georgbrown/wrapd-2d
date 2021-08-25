@@ -608,6 +608,27 @@ double TriElements::dual_potential_energy() const {
 }
 
 
+std::vector<double> TriElements::get_distortion() const {
+    std::vector<double> distortion(m_num_elements);
+    #pragma omp parallel for
+    for (int e = 0; e < m_num_elements; e++) {     
+        if (m_cached_svdsigma[e][0] < 0. || m_cached_svdsigma[e][1] < 0.) {
+            distortion[e] = 1.e8;
+        } else {
+            double val = 0.25 * (std::pow(m_cached_svdsigma[e][0], 2.0) + std::pow(m_cached_svdsigma[e][0], -2.0)
+                    + std::pow(m_cached_svdsigma[e][1], 2.0) + std::pow(m_cached_svdsigma[e][1], -2.0));
+            if (val < 1.0) { 
+                distortion[e] = 0.;
+            } else {
+                distortion[e] = std::log(val);
+            }
+        }
+    }
+    return distortion;
+}
+
+
+
 double TriElements::global_obj_value(const math::MatX2 &x_free) {
     double val = 0.;
 

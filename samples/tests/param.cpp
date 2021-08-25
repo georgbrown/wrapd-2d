@@ -24,6 +24,7 @@
 #include "AddMeshes.hpp"
 #include "Settings.hpp"
 #include "Math.hpp"
+#include "Application.hpp"
 #include "Solver.hpp"
 #include "AlgorithmData.hpp"
 #include "DataLog.hpp"
@@ -90,52 +91,53 @@ int main(int argc, char *argv[]) {
     pins.clear();
     pins.emplace_back(cand_pin_idx);
 
-    // Create, setup, and run the solver
-    std::shared_ptr<wrapd::Solver> solver = std::make_shared<wrapd::Solver>(settings);
-    binding::add_trimesh(solver.get(), input_mesh, flattened_mesh, pins, settings, settings.m_io.verbose());
-    solver->set_pins(pins);
-    solver->initialize(settings);
-    solver->solve();
-    post_solve(solver);
+    // Create, setup, and run the application
+    Application app(settings);
+    app.initialize(input_mesh, flattened_mesh, pins);
+    bool success = app.run();
 
-    if (settings.m_io.verbose() > 0) {
-        std::cout << "Saving .obj for final parameterization (wrapd-2d/output/param_out.obj)\n";
-    }
-    wrapd::math::MatX2 final_uv = solver->m_system->X();
-    input_mesh->texcoords.resize(input_mesh->vertices.size());
-    for (int vt = 0; vt < final_uv.rows(); vt++) {
-        input_mesh->texcoords[vt] = final_uv.row(vt);
-    }
-    std::stringstream param_out_filename;
-    param_out_filename << WRAPD_OUTPUT_DIR << "/" << "param_out.obj";
-    mcl::meshio::save_obj(input_mesh.get(), param_out_filename.str(), false, true);
+    if (success) {
+        post_solve(app.solver());
 
-    // Write data
-    std::stringstream outdir_ss;
-    outdir_ss << WRAPD_OUTPUT_DIR << "/";
-    if (settings.m_io.should_save_data()) {
-        int num_records = std::min(convergence_strong_index+1, static_cast<int>(objectives.size()));
-        for (int i = 0; i < num_records; i++) {
-            objectives_log.addPoint(i, objectives[i]);
+        if (settings.m_io.verbose() > 0) {
+            std::cout << "Saving .obj for final parameterization (wrapd-2d/output/param_out.obj)\n";
         }
-        for (int i = 0; i < num_records; i++) {
-            reweighted_log.addPoint(i, reweighted[i]);
+        wrapd::math::MatX2 final_uv = app.solver()->m_system->X();
+        input_mesh->texcoords.resize(input_mesh->vertices.size());
+        for (int vt = 0; vt < final_uv.rows(); vt++) {
+            input_mesh->texcoords[vt] = final_uv.row(vt);
         }
-        for (int i = 0; i < num_records; i++) {
-            flips_count_log.addPoint(i, flips_count[i]);
+        std::stringstream param_out_filename;
+        param_out_filename << WRAPD_OUTPUT_DIR << "/" << "param_out.obj";
+        mcl::meshio::save_obj(input_mesh.get(), param_out_filename.str(), false, true);
+
+        // Write data
+        std::stringstream outdir_ss;
+        outdir_ss << WRAPD_OUTPUT_DIR << "/";
+        if (settings.m_io.should_save_data()) {
+            int num_records = std::min(convergence_strong_index+1, static_cast<int>(objectives.size()));
+            for (int i = 0; i < num_records; i++) {
+                objectives_log.addPoint(i, objectives[i]);
+            }
+            for (int i = 0; i < num_records; i++) {
+                reweighted_log.addPoint(i, reweighted[i]);
+            }
+            for (int i = 0; i < num_records; i++) {
+                flips_count_log.addPoint(i, flips_count[i]);
+            }
+            inner_count_log.addPoint(0, 0);
+            for (int i = 1; i < num_records; i++) {
+                inner_count_log.addPoint(i, inner_count[i-1]);
+            }
+            for (int i = 0; i < num_records; i++) {
+                accumulated_time_s_log.addPoint(i, accumulated_time_s[i]);
+            }    
+            objectives_log.write(outdir_ss.str());
+            reweighted_log.write(outdir_ss.str());
+            flips_count_log.write(outdir_ss.str());
+            inner_count_log.write(outdir_ss.str());
+            accumulated_time_s_log.write(outdir_ss.str());
         }
-        inner_count_log.addPoint(0, 0);
-        for (int i = 1; i < num_records; i++) {
-            inner_count_log.addPoint(i, inner_count[i-1]);
-        }
-        for (int i = 0; i < num_records; i++) {
-            accumulated_time_s_log.addPoint(i, accumulated_time_s[i]);
-        }    
-        objectives_log.write(outdir_ss.str());
-        reweighted_log.write(outdir_ss.str());
-        flips_count_log.write(outdir_ss.str());
-        inner_count_log.write(outdir_ss.str());
-        accumulated_time_s_log.write(outdir_ss.str());
     } 
 }
 

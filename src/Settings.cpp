@@ -29,6 +29,11 @@
 namespace wrapd {
 
 bool Settings::parse_args(int argc, char **argv ) {
+
+    if (argc == 1) {
+        help();
+    }
+
     std::vector<std::string> cmd_list;
     std::vector<std::stringstream> val_list;
 
@@ -68,6 +73,10 @@ bool Settings::parse_args(int argc, char **argv ) {
             std::string temp_string;
             val >> temp_string;
             m_io.input_mesh(temp_string);
+        } else if (arg == "-viewer") {
+            int temp_int;
+            val >> temp_int;
+            viewer(temp_int);
         } else if (arg == "-p") {
             int temp_int;
             val >> temp_int;
@@ -158,6 +167,7 @@ void Settings::help() {
     ss << "\n==========================================\nArgs:\n" <<
         " General: \n" <<
         " -i: input mesh (path to an .obj file) \t\t [REQUIRED]\n" <<
+        " -viewer: run the app with a live viewer \t [Default: 1]       (0=disabled, 1=enabled) \n" <<
         " -p: print stats to terminal while running \t [Default: 1]       (0=disabled, 1=enabled) \n" <<
         " -s: save stats to file after running \t\t [Default: 1]       (0=disabled, 1=enabled) \n" <<
         " -it: maximum # ADMM iterations \t\t [Default: 5000]    (any integer > 0) \n" <<

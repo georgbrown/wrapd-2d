@@ -48,10 +48,11 @@ class ADMM {
 
     AlgorithmData* algorithm_data() { return &m_algorithm_data; }
 
- private:
     void setup_solve(math::MatX2& x);
     void iterate();
     void finish_solve(math::MatX2& x);
+
+ private:
 
     Settings m_settings;
     std::shared_ptr<System> m_system;

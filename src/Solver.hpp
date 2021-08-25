@@ -53,7 +53,19 @@ class Solver {
     virtual bool initialize(const Settings &settings_ = Settings());
 
     // Performs a Solver step
-    virtual void solve();
+    virtual void solve_offline();
+
+    virtual void setup();
+    virtual void iterate();
+    virtual void finish();
+
+    bool termination_check();
+
+    math::MatX2 X_current() {
+        AlgorithmData* data = m_admm_solver.algorithm_data();
+        math::MatX2 X = (data->m_S_free * data->m_curr_x_free) + (data->m_S_fix * data->m_curr_x_fix);
+        return X;
+    }
 
     // Returns the current settings
     const Settings &settings() { return m_settings; }

@@ -113,6 +113,8 @@ class TriElements {
 
     double dual_potential_energy() const;  // as a function of Z (so F or sym(F), depending on method)
 
+    std::vector<double> get_distortion() const;  // per-element distortions 
+
     void initialize_dual_vars(const math::MatX2& X);
     void advance_dual_vars();
 

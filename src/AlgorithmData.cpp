@@ -131,7 +131,7 @@ void AlgorithmData::print_initial_data() const {
     std::cout << std::endl << std::fixed;
 }
 
-void AlgorithmData::print_curr_iter_residuals() const {
+void AlgorithmData::print_curr_iter_data() const {
 
     std::cout << std::setw(7)
               << m_iter << " |"
@@ -152,6 +152,31 @@ void AlgorithmData::print_curr_iter_residuals() const {
               << m_per_iter_gs_delta_auglag[m_iter] << " |"
               << std::setw(4)
               << m_per_iter_inner_iters[m_iter];
+    }
+    std::cout << std::endl << std::fixed;
+}
+
+void AlgorithmData::print_final_iter_data() const {
+    int i = m_iter-1;
+    std::cout << std::setw(7)
+              << i << " |"
+              << std::fixed
+              << std::setprecision(3)
+              << std::setw(7)
+              << m_accumulated_time_s[i+1] << " | "
+              << std::scientific
+              << std::setprecision(15)
+              << m_objectives[i+1] << " | "
+              << std::setprecision(2)
+              << std::setw(9)
+              << m_gradnorms[i+1] << " | "
+              << std::setw(3)
+              << m_reweighted[i+1] << " | ";
+    if (m_rot_awareness == Settings::RotAwareness::ENABLED) {
+        std::cout << m_per_iter_ls_delta_auglag[i] << " | "
+              << m_per_iter_gs_delta_auglag[i] << " |"
+              << std::setw(4)
+              << m_per_iter_inner_iters[i];
     }
     std::cout << std::endl << std::fixed;
 }

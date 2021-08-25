@@ -45,8 +45,8 @@ set(EIGEN3_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/Eigen3")
 include_directories(SYSTEM ${EIGEN3_INCLUDE_DIR})
 
 # LIBIGL plus externals
-option(LIBIGL_WITH_OPENGL "Use OpenGL" OFF)
-option(LIBIGL_WITH_OPENGL_GLFW "Use GLFW" OFF)
+option(LIBIGL_WITH_OPENGL "Use OpenGL" ON)
+option(LIBIGL_WITH_OPENGL_GLFW "Use GLFW" ON)
 option(LIBIGL_WITH_OPENGL_GLFW_IMGUI "Use ImGui" OFF)
 option(LIBIGL_WITH_TETGEN "Use Tetgen" OFF)
 option(LIBIGL_WITH_PNG "Use PNG" OFF)
@@ -96,7 +96,7 @@ set( WRAPD_SRCS
 # Finally, create the library
 add_library( wrapd ${WRAPD_SRCS} )
 
-set(LINKED_LIBS "${LINKED_LIBS};blas;lapack;gfortran;igl::core")
+set(LINKED_LIBS "${LINKED_LIBS};blas;lapack;gfortran;igl::core;igl::opengl_glfw;")
 
 
 ############################################################

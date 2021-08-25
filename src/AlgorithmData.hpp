@@ -106,7 +106,8 @@ class AlgorithmData {
     virtual void update_per_iter_runtime();
 
     virtual void print_initial_data() const;
-    virtual void print_curr_iter_residuals() const;
+    virtual void print_curr_iter_data() const;
+    virtual void print_final_iter_data() const;
 
     virtual void reset_fix_free_S_matrix(std::shared_ptr<System> system);
 

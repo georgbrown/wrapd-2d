@@ -118,12 +118,16 @@ struct Settings {
     bool weight_clamp_easing() const { return m_weight_clamp_easing; }
     void weight_clamp_easing(bool val) { m_weight_clamp_easing = val; }
 
+    bool viewer() const { return m_viewer; }
+    void viewer(bool val) { m_viewer = val; }
+
     RotAwareness m_rot_awareness;
     Reweighting m_reweighting;
     double m_beta_static;
     double m_beta_min;
     double m_beta_max;
     bool m_weight_clamp_easing;
+    bool m_viewer;
 
     //
     Settings() {
@@ -137,6 +141,7 @@ struct Settings {
         m_beta_min = 1.0;
         m_beta_max = 1.e9;
         m_weight_clamp_easing = true;
+        m_viewer = true;
     }
 };
 }  // namespace wrapd

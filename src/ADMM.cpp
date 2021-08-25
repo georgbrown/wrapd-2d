@@ -58,8 +58,35 @@ bool ADMM::initialize(std::shared_ptr<System> sys, const Settings& settings) {
 
 
 void ADMM::solve(math::MatX2& X) {
-    m_micro_timer.reset();
     setup_solve(X);
+
+    for (int s_i = 0; s_i < m_settings.m_admm_iters; ++s_i) {
+        iterate();
+        if (m_algorithm_data.earlyexit_asap()) {
+            break;
+        }
+        if (m_algorithm_data.converged_strong()) {
+            break;
+        }
+    }
+
+    finish_solve(X);
+}
+
+
+
+
+void ADMM::setup_solve(math::MatX2& X) {
+    m_micro_timer.reset();
+    m_algorithm_data.m_runtime = RuntimeData();  // reset
+    m_algorithm_data.m_curr_x_free = m_algorithm_data.m_S_free.transpose() * X;
+
+    m_system->update_fix_cache(m_algorithm_data.m_curr_x_fix);
+    m_system->update_defo_cache(m_algorithm_data.m_curr_x_free, true);
+    m_system->initialize_dual_vars(X);
+    m_algorithm_data.m_iter = 0;
+
+    m_algorithm_data.log_initial_data(m_settings, m_system);
     m_algorithm_data.m_runtime.setup_solve_ms += m_micro_timer.elapsed_ms();
 
     if (m_settings.m_io.verbose() > 0) {
@@ -72,37 +99,6 @@ void ADMM::solve(math::MatX2& X) {
         // track the cost here.
         m_global_step_behavior->initialize_weights();
     }
-
-    for (int s_i = 0; s_i < m_settings.m_admm_iters; ++s_i) {
-        iterate();
-        if (m_algorithm_data.earlyexit_asap()) {
-            break;
-        }
-        if (m_algorithm_data.converged_strong()) {
-            break;
-        }
-    }
-
-    m_micro_timer.reset();
-    finish_solve(X);
-    m_algorithm_data.m_runtime.finish_solve_ms += m_micro_timer.elapsed_ms();
-}
-
-
-
-
-void ADMM::setup_solve(math::MatX2& X) {
-    mcl::MicroTimer t;
-
-    m_algorithm_data.m_runtime = RuntimeData();  // reset
-    m_algorithm_data.m_curr_x_free = m_algorithm_data.m_S_free.transpose() * X;
-
-    m_system->update_fix_cache(m_algorithm_data.m_curr_x_fix);
-    m_system->update_defo_cache(m_algorithm_data.m_curr_x_free, true);
-    m_system->initialize_dual_vars(X);
-    m_algorithm_data.m_iter = 0;
-
-    m_algorithm_data.log_initial_data(m_settings, m_system);
 
 }
 
@@ -170,16 +166,24 @@ void ADMM::iterate() {
     m_algorithm_data.update_per_iter_residuals(m_settings, m_system);
     m_algorithm_data.update_per_iter_runtime();
     if (m_settings.m_io.verbose() > 0 && m_algorithm_data.m_iter % 50 == 0) {    
-        m_algorithm_data.print_curr_iter_residuals();
+        m_algorithm_data.print_curr_iter_data();
     }
 
     m_algorithm_data.m_iter += 1;
 }
 
 void ADMM::finish_solve(math::MatX2& X) {
+    m_micro_timer.reset();
     // Setting the final x solution
     X = (m_algorithm_data.m_S_free * m_algorithm_data.m_curr_x_free)
             + (m_algorithm_data.m_S_fix * m_algorithm_data.m_curr_x_fix);
+    m_algorithm_data.m_runtime.finish_solve_ms += m_micro_timer.elapsed_ms();
+
+    if (m_settings.m_io.verbose() > 0 && (m_algorithm_data.m_iter-1) % 50 != 0) {
+        m_algorithm_data.print_final_iter_data();
+        std::cout << std::endl;
+    }
+
 }
 
 double ADMM::evaluate_auglag_objective(bool lagged_u) const {
